@@ -74,7 +74,7 @@ All messages are published to the `/topic/public` destination.
 
 1. **Clone the repository:**
    ```sh
-   git clone https://github.com/yourusername/ChatApplication.git
+   [git clone https://github.com/yourusername/ChatApplication.git](https://github.com/Jose-Daniel-Lopez/Real-Time-Chat-Web-App.git)
    ```
 2. **Navigate to the project directory:**
    ```sh
