@@ -4,12 +4,6 @@ A modern, real-time chat application built with **Spring Boot** and **WebSocket*
 
 ---
 
-
-
-
-
----
-
 ## Features
 
 - **Real-time messaging** via WebSocket protocol
