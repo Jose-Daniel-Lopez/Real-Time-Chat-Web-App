@@ -68,7 +68,7 @@ All messages are published to the `/topic/public` destination.
 
 1. **Clone the repository:**
    ```sh
-   [git clone https://github.com/Jose-Daniel-Lopez/SpringBoot-RealTimeChat-WebApplication.git)
+   git clone https://github.com/Jose-Daniel-Lopez/SpringBoot-RealTimeChat-WebApplication.git
    ```
 2. **Navigate to the project directory:**
    ```sh
