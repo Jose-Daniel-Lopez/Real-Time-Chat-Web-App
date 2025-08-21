@@ -1,16 +1,6 @@
-Absolutely! Here’s a polished and well-formatted Markdown version for your README. I’ve made a few improvements for clarity, consistency, and style (such as adding badges, clarifying instructions, and improving section formatting). I’ve also moved the screenshots into a dedicated section.
-
----
-
 # Real-Time Chat Application
 
 A modern, real-time chat application built with **Spring Boot** and **WebSocket** technology. Instantly join chat rooms, exchange messages, and see live user activity-all in a responsive, intuitive UI.
-
----
-
-
-
-
 
 ---
 
@@ -78,7 +68,7 @@ All messages are published to the `/topic/public` destination.
 
 1. **Clone the repository:**
    ```sh
-   git clone https://github.com/yourusername/ChatApplication.git
+   git clone https://github.com/Jose-Daniel-Lopez/SpringBoot-RealTimeChat-WebApplication.git
    ```
 2. **Navigate to the project directory:**
    ```sh
