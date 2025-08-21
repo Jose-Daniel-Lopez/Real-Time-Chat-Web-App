@@ -13,7 +13,7 @@ A modern, real-time chat application built with **Spring Boot** and **WebSocket*
 
 ## Technologies Used
 
-- **Java 23**
+- **Java 21**
 - **Spring Boot 3.4.5**
 - **WebSocket** for live communication
 - **Lombok** to reduce boilerplate code
@@ -61,7 +61,7 @@ All messages are published to the `/topic/public` destination.
 
 ### Prerequisites
 
-- **JDK 23** or later
+- **JDK 21** or later
 - **Maven 3.6+** (or compatible)
 
 ### Installation
