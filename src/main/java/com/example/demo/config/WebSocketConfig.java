@@ -11,14 +11,14 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-
-        // We need to register the endpoint with the path "/ws", which is the default path for WebSocket endpoints.
-        registry.addEndpoint("/ws").withSockJS();
+        // Register the endpoint with CORS allowed
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-
         // This is where we set out custom application destination prefixes
         registry.setApplicationDestinationPrefixes("/app");
         registry.enableSimpleBroker("/topic");

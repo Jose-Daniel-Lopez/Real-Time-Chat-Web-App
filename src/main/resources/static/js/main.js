@@ -30,7 +30,10 @@ const connect = (event) => {
     usernamePage.classList.add('hidden');
     chatPage.classList.remove('hidden');
 
-    const socket = new SockJS('/ws');
+    // Get the base path from the base tag, fallback to root
+    const base = document.querySelector('base')?.getAttribute('href') || '/';
+    const sockPath = (base.endsWith('/') ? base.slice(0, -1) : base) + '/ws';
+    const socket = new SockJS(sockPath);
     stompClient = Stomp.over(socket);
 
     stompClient.connect({}, onConnected, onError);

@@ -1,129 +1,151 @@
-# Real-Time Chat Application
+# Chat Application VPS Deployment
 
-A modern, real-time chat application built with **Spring Boot** and **WebSocket** technology. Instantly join chat rooms, exchange messages, and see live user activity-all in a responsive, intuitive UI.
+This directory contains all the files needed to deploy your Real-Time Chat Application to a VPS.
 
----
+## Files Included
 
-## Features
+- `demo-0.0.1-SNAPSHOT.jar` - The main application JAR file
+- `application-prod.properties` - Production configuration
+- `chat-application.service` - systemd service configuration
+- `deploy.sh` - Automated deployment script
+- `nginx.conf` - Nginx reverse proxy configuration (optional)
 
-- **Real-time messaging** via WebSocket protocol
-- **User status notifications** (join/leave events)
-- **Simple, intuitive UI**
-- **Responsive design** for desktop and mobile
+## Quick Deployment
 
-## Technologies Used
+### Option 1: Automated Deployment (Recommended)
 
-- **Java 23**
-- **Spring Boot 3.4.5**
-- **WebSocket** for live communication
-- **Lombok** to reduce boilerplate code
-- **Spring DevTools** for hot-reloading in development
-- **Maven** for build automation and dependency management
+1. Upload all files to your VPS
+2. SSH into your VPS
+3. Navigate to the deployment directory
+4. Run: `sudo ./deploy.sh`
 
-## Project Structure
+### Option 2: Manual Deployment
 
-```
-src/
-├── main/
-│   ├── java/
-│   │   └── com/
-│   │       └── example/
-│   │           └── demo/
-│   │               ├── controller/
-│   │               │   └── ChatController.java
-│   │               ├── model/
-│   │               │   └── ChatMessage.java
-│   │               └── ChatApplication.java
-│   └── resources/
-│       ├── static/
-│       │   ├── css/main.css
-│       │   ├── js/main.js
-│       │   └── index.html
-│       └── application.properties
-└── test/
-```
+If you prefer to deploy manually, follow these steps:
 
-## API Endpoints
-
-- **/chat.sendMessage** - Send messages to all users
-- **/chat.addUser** - Add a new user to the chat
-
-All messages are published to the `/topic/public` destination.
-
-## How It Works
-
-1. Users connect to the WebSocket server.
-2. On join, usernames are stored in the session.
-3. Messages are broadcast to all connected clients.
-4. Join/leave events are also broadcast to everyone in real-time.
-
-## Getting Started
-
-### Prerequisites
-
-- **JDK 23** or later
-- **Maven 3.6+** (or compatible)
-
-### Installation
-
-1. **Clone the repository:**
-   ```sh
-   git clone https://github.com/Jose-Daniel-Lopez/SpringBoot-RealTimeChat-WebApplication.git
-   ```
-2. **Navigate to the project directory:**
-   ```sh
-   cd ChatApplication
-   ```
-3. **Build the project:**
-   ```sh
-   mvn clean install
-   ```
-4. **Run the application:**
-   ```sh
-   mvn spring-boot:run
-   ```
-5. **Open your browser at:**
-   ```
-   http://localhost:8080
+1. **Update system and install Java:**
+   ```bash
+   sudo apt update && sudo apt upgrade -y
+   sudo apt install -y openjdk-21-jdk
    ```
 
-## Usage
+2. **Create application user:**
+   ```bash
+   sudo useradd --system --shell /bin/false --home-dir /opt/chat-application --create-home chatapp
+   ```
 
-1. Enter your username when prompted.
-2. Start chatting in the room.
-3. Watch real-time updates as users join or leave.
+3. **Create directories:**
+   ```bash
+   sudo mkdir -p /opt/chat-application
+   sudo mkdir -p /var/log/chat-app
+   sudo chown -R chatapp:chatapp /opt/chat-application
+   sudo chown -R chatapp:chatapp /var/log/chat-app
+   ```
 
-## Development
+4. **Copy application files:**
+   ```bash
+   sudo cp demo-0.0.1-SNAPSHOT.jar /opt/chat-application/
+   sudo cp application-prod.properties /opt/chat-application/
+   sudo chown chatapp:chatapp /opt/chat-application/*
+   ```
 
-Spring Boot DevTools is enabled for hot-reloading. Java class changes trigger automatic restarts; static resource changes are reflected instantly.
+5. **Install systemd service:**
+   ```bash
+   sudo cp chat-application.service /etc/systemd/system/
+   sudo systemctl daemon-reload
+   sudo systemctl enable chat-application
+   sudo systemctl start chat-application
+   ```
 
-### Building for Production
+6. **Configure firewall:**
+   ```bash
+   sudo ufw allow 8080/tcp
+   ```
 
-To create a standalone JAR:
+## Optional: Nginx Reverse Proxy
 
-```sh
-mvn clean package
+For production use with a domain name, set up Nginx:
+
+1. **Install Nginx:**
+   ```bash
+   sudo apt install -y nginx
+   ```
+
+2. **Configure Nginx:**
+   ```bash
+   sudo cp nginx.conf /etc/nginx/sites-available/chat-application
+   sudo ln -s /etc/nginx/sites-available/chat-application /etc/nginx/sites-enabled/
+   sudo rm /etc/nginx/sites-enabled/default  # Remove default site
+   ```
+
+3. **Edit the configuration:**
+   - Replace `your-domain.com` with your actual domain
+   - Test configuration: `sudo nginx -t`
+   - Restart Nginx: `sudo systemctl restart nginx`
+
+## Post-Deployment
+
+### Check Service Status
+```bash
+sudo systemctl status chat-application
 ```
 
-The JAR will be in the `target` directory.
+### View Logs
+```bash
+# Real-time logs
+sudo journalctl -u chat-application -f
 
-## Screenshots
+# Application logs (if logging to file is configured)
+sudo tail -f /var/log/chat-app/chat-application.log
+```
 
-![Image 1](https://i.imgur.com/Pd1HCVA.jpg)
+### Manage the Service
+```bash
+# Start
+sudo systemctl start chat-application
 
-![Image 2](https://media.discordapp.net/attachments/595710068876378112/1370803587466399785/CleanShot_2025-05-10_at_18.43.512x.png?ex=6820d3d3&is=681f8253&hm=8c13c312f9287c92ea62923bbfbc5dca7fac2a88baf761e5adcbe37d03a0f6d3&=&format=webp&quality=lossless&width=2224&height=1445)
+# Stop
+sudo systemctl stop chat-application
 
-![Image 3](https://i.imgur.com/HGeCd0B.jpg)
+# Restart
+sudo systemctl restart chat-application
 
-## Contributing
+# Disable auto-start
+sudo systemctl disable chat-application
+```
 
-Contributions are welcome! Please open an issue or submit a pull request.
+## Accessing the Application
 
-## License
+- **Direct access:** `http://YOUR_VPS_IP:8080`
+- **With Nginx:** `http://your-domain.com` (after domain configuration)
 
-This project is open for everyone to use, modify, and share. No license or contract applies.
+## Troubleshooting
 
-## Acknowledgments
+### Service won't start
+1. Check logs: `sudo journalctl -u chat-application -n 50`
+2. Verify Java installation: `java -version`
+3. Check file permissions: `ls -la /opt/chat-application/`
 
-- The Spring Boot team for their excellent framework
-- The WebSocket protocol for enabling real-time communication
+### Port 8080 not accessible
+1. Check firewall: `sudo ufw status`
+2. Verify service is running: `sudo netstat -tlnp | grep 8080`
+3. Check VPS provider firewall rules
+
+### Memory issues
+- The application is configured to use 256MB-512MB RAM
+- Adjust in the systemd service file if needed
+
+## Security Notes
+
+- The application runs as a non-root user (`chatapp`)
+- Firewall rules limit access to necessary ports only
+- Consider using HTTPS with SSL certificates for production
+- Regularly update your VPS and Java runtime
+
+## Support
+
+If you encounter issues, check:
+1. Application logs
+2. System journal logs
+3. Network connectivity
+4. Java version compatibility (Java 21+ required)

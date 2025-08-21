@@ -1,0 +1,27 @@
+[Unit]
+Description=Real-Time Chat Application
+After=network.target
+
+[Service]
+Type=simple
+User=chatapp
+Group=chatapp
+WorkingDirectory=/opt/chat-application
+ExecStart=/usr/bin/java -jar -Dspring.profiles.active=prod /opt/chat-application/demo-0.0.1-SNAPSHOT.jar
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Security settings
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/log/chat-app
+
+# Environment
+Environment=JAVA_OPTS="-Xms256m -Xmx512m"
+
+[Install]
+WantedBy=multi-user.target
