@@ -3,11 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-  <title>Spring Boot WebSocket Chat Application</title>
-  <base href="/jose-chatapp/">
+  <title>WebSockets Chatapp</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap & Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-  <link rel="stylesheet" href="css/main.css" />
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/jose-chatapp/css/main.css" />
 </head>
 <body>
 <noscript>
@@ -18,22 +26,26 @@
 
 <!-- Username Page -->
 <div id="username-page" class="container-fluid vh-100 d-flex align-items-center justify-content-center">
-  <div class="card shadow-lg border-0 rounded-4">
-    <div class="card-header bg-primary text-white text-center border-0 rounded-top-4 py-3">
-      <h2 class="mb-0">Welcome to Chat</h2>
+  <div class="card shadow-lg border-0 rounded-4 username-card">
+    <div class="card-header bg-main text-white text-center border-0 rounded-top-4 py-4">
+      <div class="welcome-icon mb-2">
+        <i class="bi bi-chat-dots-fill fs-2"></i>
+      </div>
+      <h2 class="mb-0 fw-bold">Welcome</h2>
+      <p class="mb-0 mt-2 opacity-75">Enter your username and start chatting</p>
     </div>
     <div class="card-body p-4">
       <form id="usernameForm" name="usernameForm">
         <div class="mb-4">
-          <label for="name" class="form-label">Enter your username</label>
-          <div class="input-group">
-            <span class="input-group-text bg-light"><i class="bi bi-person-fill"></i></span>
-            <input type="text" id="name" placeholder="Username" autocomplete="off" class="form-control form-control-lg shadow-none" />
+          <label for="name" class="form-label fw-semibold text-muted">Choose your username</label>
+          <div class="input-group input-group-lg">
+            <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-fill text-primary"></i></span>
+            <input type="text" id="name" placeholder="..." autocomplete="off" class="form-control shadow-none border-start-0 ps-2" />
           </div>
         </div>
         <div class="d-grid">
-          <button type="submit" class="btn btn-primary btn-lg rounded-3">
-            <i class="bi bi-chat-dots-fill me-2"></i>Start Chatting
+          <button type="submit" class="btn btn-gradient btn-lg rounded-3 fw-semibold">
+            Join
           </button>
         </div>
       </form>
@@ -44,30 +56,40 @@
 <!-- Chat Page -->
 <div id="chat-page" class="hidden container-fluid vh-100 d-flex align-items-center justify-content-center">
   <div class="card shadow-lg border-0 rounded-4 chat-container">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3 border-0 rounded-top-4">
-      <button class="btn btn-sm btn-outline-light border-0" id="back-button" onClick="window.location.reload()">
-        <i class="bi bi-arrow-left"></i>
+    <div class="card-header bg-main text-white d-flex justify-content-between align-items-center py-3 border-0 rounded-top-4">
+      <button class="btn btn-sm btn-outline-light border-0 rounded-circle hover-effect" id="back-button" onClick="window.location.reload()">
+        <i class="bi bi-arrow-left fs-6"></i>
       </button>
-      <h3 class="mb-0 fs-5">Spring WebSocket Chat</h3>
-      <!-- -->
-      <span class="badge bg-light text-primary rounded-pill" id="online-count"><i class="bi bi-person-fill"></i>2</span>
+      <div class="text-center">
+        <h3 class="mb-0 fs-5 fw-bold">
+          <i class="bi bi-lightning-charge-fill me-2"></i>WebSocket Chat
+        </h3>
+        <small class="opacity-75">Real-time messaging</small>
+      </div>
+      <span class="badge bg-white text-primary rounded-pill px-3 py-2 fw-semibold" id="online-count">
+        <i class="bi bi-circle-fill text-success me-1" style="font-size: 0.7rem;"></i>
+        <span class="online-text">Online</span>
+      </span>
     </div>
 
-    <div class="connecting alert alert-info mb-0 rounded-0 text-center">
-      <i class="bi bi-arrow-repeat me-2"></i>Connecting...
+    <div class="connecting alert alert-info mb-0 rounded-0 text-center border-0">
+      <div class="spinner-border spinner-border-sm me-2" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <span class="fw-semibold">Connecting to chat...</span>
     </div>
 
-    <div class="card-body d-flex flex-column p-0">
-      <ul id="messageArea" class="list-unstyled flex-grow-1 overflow-auto p-3 mb-0">
+    <div class="card-body d-flex flex-column p-0 chat-body">
+      <ul id="messageArea" class="list-unstyled message-list">
         <!-- Messages will be added here by JavaScript -->
       </ul>
     </div>
 
-    <div class="card-footer bg-white border-top-0 p-3 rounded-bottom-4">
+    <div class="card-footer bg-white border-0 p-3 rounded-bottom-4 message-input-area">
       <form id="messageForm" name="messageForm" autocomplete="off">
         <div class="input-group">
-          <input type="text" id="message" placeholder="Type a message..." autocomplete="off" class="form-control shadow-none border-end-0" />
-          <button type="submit" class="btn btn-primary">
+          <input type="text" id="message" placeholder="Type your message..." autocomplete="off" class="form-control shadow-none border-end-0 message-input" />
+          <button type="submit" class="btn btn-gradient send-btn">
             <i class="bi bi-send-fill"></i>
           </button>
         </div>
@@ -76,9 +98,9 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-<script src="js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js  "></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js  "></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js  "></script>
+<script src="/jose-chatapp/js/main.js"></script>
 </body>
 </html>
