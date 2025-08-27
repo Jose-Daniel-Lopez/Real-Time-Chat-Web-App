@@ -1,3 +1,6 @@
+// For some reason which I still need to figure out, this file cannot be imported in deployment.
+// For now, all this code is pasted into index.html
+// Until I find a way fix paths
 'use strict';
 
 // DOM Elements

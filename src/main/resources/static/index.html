@@ -1,106 +1,722 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-  <title>WebSockets Chatapp</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
+    <title>WebSockets Chatapp - Jose</title>
+    <base href="/jose-chatapp" />
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Bootstrap & Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-  
-  <!-- Custom Styles -->
-  <link rel="stylesheet" href="/jose-chatapp/css/main.css" />
-</head>
-<body>
-<noscript>
-  <div class="alert alert-danger text-center m-3">
-    <h2>Sorry. Your browser doesn't support Javascript</h2>
-  </div>
-</noscript>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-<!-- Username Page -->
-<div id="username-page" class="container-fluid vh-100 d-flex align-items-center justify-content-center">
-  <div class="card shadow-lg border-0 rounded-4 username-card">
-    <div class="card-header bg-main text-white text-center border-0 rounded-top-4 py-4">
-      <div class="welcome-icon mb-2">
-        <i class="bi bi-chat-dots-fill fs-2"></i>
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+
+    <!-- Custom Styles -->
+    <style>
+      /* General Styles */
+      :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --bg-main: rgb(76, 130, 255);
+        --message-bg: rgba(194, 194, 194, 0.95);
+        --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.15);
+        --border-radius: 20px;
+        --animation-speed: 0.3s;
+      }
+
+      body {
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-weight: 400;
+        line-height: 1.6;
+        color: #2d3748;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      /* Modern gradient buttons */
+      .btn-gradient {
+        background: var(--bg-main);
+        border: none;
+        color: white;
+        transition: all var(--animation-speed) cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-gradient::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+      }
+
+      .btn-gradient:hover::before {
+        left: 100%;
+      }
+
+      .btn-gradient:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-hover);
+        color: white;
+      }
+
+      .bg-main {
+        background: var(--bg-main) !important;
+      }
+
+      /* Username Page Styles */
+      .username-card {
+        max-width: 450px;
+        width: 100%;
+        backdrop-filter: blur(20px);
+        background: var(--message-bg);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .welcome-icon {
+        animation: bounce 2s infinite;
+      }
+
+      @keyframes bounce {
+        0%, 20%, 53%, 80%, 100% {
+          transform: translate3d(0, 0, 0);
+        }
+        40%, 43% {
+          transform: translate3d(0, -10px, 0);
+        }
+        70% {
+          transform: translate3d(0, -5px, 0);
+        }
+        90% {
+          transform: translate3d(0, -2px, 0);
+        }
+      }
+
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Enhanced Input Styles */
+      .input-group-text {
+        border-color: #e2e8f0;
+        background: rgba(248, 250, 252, 0.8);
+        transition: all var(--animation-speed);
+      }
+
+      .form-control {
+        border-color: #e2e8f0;
+        transition: all var(--animation-speed);
+        background: rgba(255, 255, 255, 0.9);
+      }
+
+      .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.15);
+        background: white;
+      }
+
+      .input-group:focus-within .input-group-text {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+      }
+
+      /* Chat Container */
+      .chat-container {
+        max-width: 800px;
+        width: 100%;
+        height: 85vh;
+        max-height: 750px;
+        backdrop-filter: blur(20px);
+        background: var(--message-bg);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-body {
+        background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .hover-effect {
+        transition: all var(--animation-speed);
+      }
+
+      .hover-effect:hover {
+        transform: scale(1.1);
+        background: rgba(255, 255, 255, 0.2) !important;
+      }
+
+      /* Message Area */
+      .message-list {
+        background: transparent;
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e0 transparent;
+        height: 100%;
+        max-height: calc(85vh - 200px);
+        overflow-y: auto;
+        padding: 1rem;
+        margin: 0;
+      }
+
+      .message-list::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .message-list::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .message-list::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #cbd5e0, #a0aec0);
+        border-radius: 10px;
+      }
+
+      .message-list::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #a0aec0, #718096);
+      }
+
+      /* Modern Message Styling */
+      .chat-message {
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        border-radius: var(--border-radius);
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        background: rgb(236, 236, 236);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        max-width: 85%;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        transition: all var(--animation-speed);
+        animation: messageSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      @keyframes messageSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      .chat-message:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+      }
+
+      /* Enhanced Avatar styling */
+      .chat-message i {
+        display: inline-flex;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        color: white;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        font-style: normal;
+        font-weight: bold;
+        margin-right: 15px;
+        font-size: 18px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.8);
+        position: relative;
+      }
+
+      .chat-message i::after {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, rgba(255, 255, 255, 0.3), transparent);
+        z-index: -1;
+      }
+
+      /* Username styling */
+      .chat-message span {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #2d3748;
+        width: calc(100% - 57px);
+        font-size: 0.95rem;
+        letter-spacing: 0.3px;
+      }
+
+      /* Message text */
+      .chat-message p {
+        margin: 8px 0 0 57px;
+        width: 100%;
+        color: #4a5568;
+        line-height: 1.5;
+        font-size: 0.95rem;
+      }
+
+      /* Event message styling */
+      .event-message {
+        text-align: center;
+        padding: 12px 20px;
+        margin: 20px auto;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        border-radius: 50px;
+        color: #667eea;
+        font-style: italic;
+        font-weight: 500;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        backdrop-filter: blur(10px);
+        max-width: 300px;
+        animation: eventPulse 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      @keyframes eventPulse {
+        0% {
+          opacity: 0;
+          transform: scale(0.8);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      /* Connecting Alert */
+      .connecting {
+        border: none;
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(155, 89, 182, 0.1) 100%);
+        color: #667eea;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+      }
+
+      .connecting.error {
+        background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(192, 57, 43, 0.1) 100%);
+        color: #e74c3c;
+      }
+
+      /* Message Input Area */
+      .message-input-area {
+        background: linear-gradient(180deg, rgba(248, 250, 252, 0.9) 0%, rgba(255, 255, 255, 0.9) 100%);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+        flex-shrink: 0;
+        position: relative;
+      }
+
+      .message-input {
+        border: 2px solid #e2e8f0;
+        border-radius: 25px;
+        padding: 12px 20px;
+        font-size: 0.95rem;
+        background: rgba(255, 255, 255, 0.9);
+        transition: all var(--animation-speed);
+      }
+
+      .message-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.15);
+        background: white;
+      }
+
+      .send-btn {
+        border-radius: 25px;
+        padding: 12px 20px;
+        margin-left: 10px;
+        transition: all var(--animation-speed);
+      }
+
+      .send-btn:hover {
+        transform: scale(1.05);
+      }
+
+      /* Enhanced Animations */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn var(--animation-speed) ease-out;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .chat-container {
+          height: 100vh;
+          max-height: none;
+          border-radius: 0 !important;
+          margin: 0;
+        }
+
+        .message-list {
+          max-height: calc(100vh - 180px);
+        }
+
+        .username-card {
+          width: 95%;
+          margin: 0 auto;
+        }
+
+        .card-header h3 {
+          font-size: 1rem;
+        }
+
+        .chat-message {
+          max-width: 95%;
+          margin-bottom: 15px;
+          padding: 12px 15px;
+        }
+
+        .chat-message i {
+          width: 36px;
+          height: 36px;
+          font-size: 16px;
+        }
+
+        .chat-message span {
+          width: calc(100% - 51px);
+        }
+
+        .chat-message p {
+          margin: 6px 0 0 51px;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .username-card {
+          width: 90%;
+        }
+      }
+
+      /* Loading Animation */
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .spinner-border-sm {
+        animation: spin 1s linear infinite;
+      }
+
+      /* Online indicator pulse */
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      .text-success {
+        animation: pulse 2s infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>
+      <div class="alert alert-danger text-center m-3">
+        <h2>Sorry. Your browser doesn't support JavaScript</h2>
       </div>
-      <h2 class="mb-0 fw-bold">Welcome</h2>
-      <p class="mb-0 mt-2 opacity-75">Enter your username and start chatting</p>
-    </div>
-    <div class="card-body p-4">
-      <form id="usernameForm" name="usernameForm">
-        <div class="mb-4">
-          <label for="name" class="form-label fw-semibold text-muted">Choose your username</label>
-          <div class="input-group input-group-lg">
-            <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-fill text-primary"></i></span>
-            <input type="text" id="name" placeholder="..." autocomplete="off" class="form-control shadow-none border-start-0 ps-2" />
+    </noscript>
+
+    <!-- Username Page -->
+    <div id="username-page" class="container-fluid vh-100 d-flex align-items-center justify-content-center">
+      <div class="card shadow-lg border-0 rounded-4 username-card">
+        <div class="card-header bg-main text-white text-center border-0 rounded-top-4 py-4">
+          <div class="welcome-icon mb-2">
+            <i class="bi bi-chat-dots-fill fs-2"></i>
           </div>
+          <h2 class="mb-0 fw-bold">Welcome!</h2>
+          <p class="mb-0 mt-2 opacity-75">Enter your username and start chatting</p>
         </div>
-        <div class="d-grid">
-          <button type="submit" class="btn btn-gradient btn-lg rounded-3 fw-semibold">
-            Join
-          </button>
+        <div class="card-body p-4">
+          <form id="usernameForm" name="usernameForm">
+            <div class="mb-4">
+              <label for="name" class="form-label fw-semibold text-muted">Choose your username</label>
+              <div class="input-group input-group-lg">
+                <span class="input-group-text bg-light border-end-0">
+                  <i class="bi bi-person-fill text-primary"></i>
+                </span>
+                <input
+                  type="text"
+                  id="name"
+                  placeholder="..."
+                  autocomplete="off"
+                  class="form-control shadow-none border-start-0 ps-2"
+                />
+              </div>
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-gradient btn-lg rounded-3 fw-semibold">
+                Join
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- Chat Page -->
-<div id="chat-page" class="hidden container-fluid vh-100 d-flex align-items-center justify-content-center">
-  <div class="card shadow-lg border-0 rounded-4 chat-container">
-    <div class="card-header bg-main text-white d-flex justify-content-between align-items-center py-3 border-0 rounded-top-4">
-      <button class="btn btn-sm btn-outline-light border-0 rounded-circle hover-effect" id="back-button" onClick="window.location.reload()">
-        <i class="bi bi-arrow-left fs-6"></i>
-      </button>
-      <div class="text-center">
-        <h3 class="mb-0 fs-5 fw-bold">
-          <i class="bi bi-lightning-charge-fill me-2"></i>WebSocket Chat
-        </h3>
-        <small class="opacity-75">Real-time messaging</small>
       </div>
-      <span class="badge bg-white text-primary rounded-pill px-3 py-2 fw-semibold" id="online-count">
-        <i class="bi bi-circle-fill text-success me-1" style="font-size: 0.7rem;"></i>
-        <span class="online-text">Online</span>
-      </span>
     </div>
 
-    <div class="connecting alert alert-info mb-0 rounded-0 text-center border-0">
-      <div class="spinner-border spinner-border-sm me-2" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-      <span class="fw-semibold">Connecting to chat...</span>
-    </div>
-
-    <div class="card-body d-flex flex-column p-0 chat-body">
-      <ul id="messageArea" class="list-unstyled message-list">
-        <!-- Messages will be added here by JavaScript -->
-      </ul>
-    </div>
-
-    <div class="card-footer bg-white border-0 p-3 rounded-bottom-4 message-input-area">
-      <form id="messageForm" name="messageForm" autocomplete="off">
-        <div class="input-group">
-          <input type="text" id="message" placeholder="Type your message..." autocomplete="off" class="form-control shadow-none border-end-0 message-input" />
-          <button type="submit" class="btn btn-gradient send-btn">
-            <i class="bi bi-send-fill"></i>
+    <!-- Chat Page -->
+    <div id="chat-page" class="hidden container-fluid vh-100 d-flex align-items-center justify-content-center">
+      <div class="card shadow-lg border-0 rounded-4 chat-container">
+        <div class="card-header bg-main text-white d-flex justify-content-between align-items-center py-3 border-0 rounded-top-4">
+          <button
+            class="btn btn-sm btn-outline-light border-0 rounded-circle hover-effect"
+            id="back-button"
+            onclick="window.location.reload()"
+          >
+            <i class="bi bi-arrow-left fs-6"></i>
           </button>
+          <div class="text-center">
+            <h3 class="mb-0 fs-5 fw-bold">
+              <i class="bi bi-lightning-charge-fill me-2"></i>WebSocket Chat
+            </h3>
+            <small class="opacity-75">Real-time messaging</small>
+          </div>
+          <span class="badge bg-white text-primary rounded-pill px-3 py-2 fw-semibold" id="online-count">
+            <i class="bi bi-circle-fill text-success me-1" style="font-size: 0.7rem;"></i>
+            <span class="online-text">Online</span>
+          </span>
         </div>
-      </form>
-    </div>
-  </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js  "></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js  "></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js  "></script>
-<script src="/jose-chatapp/js/main.js"></script>
-</body>
+        <div class="connecting alert alert-info mb-0 rounded-0 text-center border-0">
+          <div class="spinner-border spinner-border-sm me-2" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <span class="fw-semibold">Connecting to chat...</span>
+        </div>
+
+        <div class="card-body d-flex flex-column p-0 chat-body">
+          <ul id="messageArea" class="list-unstyled message-list">
+            <!-- Messages will be added here by JavaScript -->
+          </ul>
+        </div>
+
+        <div class="card-footer bg-white border-0 p-3 rounded-bottom-4 message-input-area">
+          <form id="messageForm" name="messageForm" autocomplete="off">
+            <div class="input-group">
+              <input
+                type="text"
+                id="message"
+                placeholder="Type your message..."
+                autocomplete="off"
+                class="form-control shadow-none border-end-0 message-input"
+              />
+              <button type="submit" class="btn btn-gradient send-btn">
+                <i class="bi bi-send-fill"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <script>
+      'use strict';
+
+      // DOM Elements
+      const usernamePage = document.querySelector('#username-page');
+      const chatPage = document.querySelector('#chat-page');
+      const usernameForm = document.querySelector('#usernameForm');
+      const messageForm = document.querySelector('#messageForm');
+      const messageInput = document.querySelector('#message');
+      const messageArea = document.querySelector('#messageArea');
+      const connectingElement = document.querySelector('.connecting');
+
+      let stompClient = null;
+      let username = null;
+
+      const colors = [
+        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+        'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+        'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+        'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
+      ];
+
+      // Auto-scroll thresholds
+      const AUTO_SCROLL_THRESHOLD = 200;
+      const MAX_MESSAGE_KEEP = 2000;
+
+      // Connects to WebSocket and transitions UI
+      const connect = (event) => {
+        event.preventDefault();
+        username = document.querySelector('#name').value.trim();
+
+        if (!username) {
+          alert('Please enter a username!');
+          return;
+        }
+
+        usernamePage.classList.add('hidden');
+        chatPage.classList.remove('hidden');
+
+        const base = document.querySelector('base')?.getAttribute('href') || '/';
+        const cleanBase = base.replace(/\/$/, '');
+        const sockPath = cleanBase + '/ws';
+
+        console.log('Connecting to WebSocket at:', sockPath);
+        const socket = new SockJS(sockPath);
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, onConnected, onError);
+      };
+
+      // On successful connection
+      const onConnected = () => {
+        stompClient.subscribe('/topic/public', onMessageReceived);
+
+        stompClient.send('/app/chat.addUser', {}, JSON.stringify({
+          sender: username,
+          type: 'JOIN'
+        }));
+
+        connectingElement.classList.add('hidden');
+      };
+
+      // Check if user is near the bottom of the chat
+      const isUserNearBottom = () => {
+        const threshold = 100;
+        return (messageArea.scrollHeight - messageArea.scrollTop - messageArea.clientHeight) <= threshold;
+      };
+
+      // On connection error
+      const onError = (_error) => {
+        connectingElement.textContent = 'Could not connect to WebSocket server. Please refresh this page to try again!';
+        connectingElement.classList.add('error');
+      };
+
+      // Sends a chat message
+      const sendMessage = (event) => {
+        event.preventDefault();
+        const messageContent = messageInput.value.trim();
+
+        if (messageContent && stompClient) {
+          const chatMessage = {
+            sender: username,
+            content: messageContent,
+            type: 'CHAT'
+          };
+          stompClient.send('/app/chat.sendMessage', {}, JSON.stringify(chatMessage));
+          messageInput.value = '';
+        }
+      };
+
+      // Handles incoming messages
+      const onMessageReceived = (payload) => {
+        const message = JSON.parse(payload.body);
+        const messageElement = document.createElement('li');
+        const wasNearBottom = isUserNearBottom();
+        const willBeFlooded = messageArea.childElementCount >= AUTO_SCROLL_THRESHOLD;
+
+        if (message.type === 'JOIN' || message.type === 'LEAVE') {
+          messageElement.classList.add('event-message');
+          messageElement.innerHTML = `
+            <i class="bi bi-${message.type === 'JOIN' ? 'person-plus-fill' : 'person-dash-fill'} me-2"></i>
+            ${message.sender} ${message.type === 'JOIN' ? 'joined the chat' : 'left the chat'}
+          `;
+        } else {
+          messageElement.classList.add('chat-message');
+
+          const avatarElement = document.createElement('i');
+          avatarElement.textContent = message.sender[0].toUpperCase();
+          avatarElement.style.background = getAvatarColor(message.sender);
+
+          const usernameElement = document.createElement('span');
+          const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          usernameElement.innerHTML = `${message.sender} <small class="text-muted ms-2">${timestamp}</small>`;
+
+          const textElement = document.createElement('p');
+          textElement.textContent = message.content;
+
+          messageElement.append(avatarElement, usernameElement, textElement);
+        }
+
+        messageElement.classList.add('fade-in');
+        messageArea.appendChild(messageElement);
+
+        // Trim oldest messages if needed
+        if (messageArea.childElementCount > MAX_MESSAGE_KEEP) {
+          const removeCount = messageArea.childElementCount - MAX_MESSAGE_KEEP;
+          for (let i = 0; i < removeCount; i++) {
+            if (messageArea.firstChild) messageArea.removeChild(messageArea.firstChild);
+          }
+        }
+
+        // Auto-scroll logic
+        if (wasNearBottom || willBeFlooded) {
+          messageArea.scrollTop = messageArea.scrollHeight;
+        }
+      };
+
+      // Generates avatar color based on username
+      const getAvatarColor = (messageSender) => {
+        let hash = 0;
+        for (let i = 0; i < messageSender.length; i++) {
+          hash = 31 * hash + messageSender.charCodeAt(i);
+        }
+        const index = Math.abs(hash % colors.length);
+        return colors[index];
+      };
+
+      // Event Listeners
+      usernameForm.addEventListener('submit', connect);
+      messageForm.addEventListener('submit', sendMessage);
+    </script>
+  </body>
 </html>
