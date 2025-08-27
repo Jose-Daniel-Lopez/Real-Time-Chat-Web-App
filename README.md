@@ -13,7 +13,7 @@ A real-time chat application built with Spring Boot and WebSocket technology, al
 
 ## Technology Stack
 
-- **Java 21**
+- **Java 23**
 - **Spring Boot 3.4.5**
 - **WebSocket** for live communication
 - **Lombok** to reduce boilerplate code
