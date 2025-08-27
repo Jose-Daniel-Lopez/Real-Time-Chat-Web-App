@@ -1,151 +1,110 @@
-# Chat Application VPS Deployment
+# SpringBoot Real-Time Chat Web Application
 
-This directory contains all the files needed to deploy your Real-Time Chat Application to a VPS.
+A real-time chat application built with Spring Boot and WebSocket technology, allowing users to communicate instantly in a shared chat room.
 
-## Files Included
+## Features
 
-- `demo-0.0.1-SNAPSHOT.jar` - The main application JAR file
-- `application-prod.properties` - Production configuration
-- `chat-application.service` - systemd service configuration
-- `deploy.sh` - Automated deployment script
-- `nginx.conf` - Nginx reverse proxy configuration (optional)
+- **Real-time messaging** using WebSocket connections
+- **User join/leave notifications** broadcast to all users
+- **Responsive design** with Bootstrap CSS framework
+- **Modern UI** with Google Fonts and Bootstrap Icons
+- **Spring Boot backend** with WebSocket configuration
+- **Production-ready** with proper context path configuration
 
-## Quick Deployment
+## Technology Stack
 
-### Option 1: Automated Deployment (Recommended)
+- **Java 21**
+- **Spring Boot 3.4.5**
+- **WebSocket** for live communication
+- **Lombok** to reduce boilerplate code
+- **Spring DevTools** for hot-reloading in development
+- **Maven** for build automation and dependency management
 
-1. Upload all files to your VPS
-2. SSH into your VPS
-3. Navigate to the deployment directory
-4. Run: `sudo ./deploy.sh`
+## WebSocket Endpoints
 
-### Option 2: Manual Deployment
+The application exposes the following WebSocket endpoints:
 
-If you prefer to deploy manually, follow these steps:
+- **/ws** - WebSocket connection endpoint
+- **/chat.sendMessage** - Send messages to all users
+- **/chat.addUser** - Add a new user to the chat
 
-1. **Update system and install Java:**
-   ```bash
-   sudo apt update && sudo apt upgrade -y
-   sudo apt install -y openjdk-21-jdk
+All messages are published to the `/topic/public` destination.
+
+## How It Works
+
+1. Users connect to the WebSocket server.
+2. On join, usernames are stored in the session.
+3. Messages are broadcast to all connected clients.
+4. Join/leave events are also broadcast to everyone in real-time.
+
+## Getting Started
+
+### Prerequisites
+
+- **JDK 21** or later
+- **Maven 3.6+** (or compatible)
+
+### Installation
+
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/Jose-Daniel-Lopez/SpringBoot-RealTimeChat-WebApplication.git
+   ```
+2. **Navigate to the project directory:**
+   ```sh
+   cd SpringBoot-RealTimeChat-WebApplication
+   ```
+3. **Build the project:**
+   ```sh
+   mvn clean install
+   ```
+4. **Run the application:**
+   ```sh
+   mvn spring-boot:run
+   ```
+5. **Open your browser at:**
+   ```
+   http://localhost:8080/jose-chatapp
    ```
 
-2. **Create application user:**
-   ```bash
-   sudo useradd --system --shell /bin/false --home-dir /opt/chat-application --create-home chatapp
-   ```
+## Usage
 
-3. **Create directories:**
-   ```bash
-   sudo mkdir -p /opt/chat-application
-   sudo mkdir -p /var/log/chat-app
-   sudo chown -R chatapp:chatapp /opt/chat-application
-   sudo chown -R chatapp:chatapp /var/log/chat-app
-   ```
+1. Enter your username when prompted.
+2. Start chatting in the room.
+3. Watch real-time updates as users join or leave.
 
-4. **Copy application files:**
-   ```bash
-   sudo cp demo-0.0.1-SNAPSHOT.jar /opt/chat-application/
-   sudo cp application-prod.properties /opt/chat-application/
-   sudo chown chatapp:chatapp /opt/chat-application/*
-   ```
+## Development
 
-5. **Install systemd service:**
-   ```bash
-   sudo cp chat-application.service /etc/systemd/system/
-   sudo systemctl daemon-reload
-   sudo systemctl enable chat-application
-   sudo systemctl start chat-application
-   ```
+Spring Boot DevTools is enabled for hot-reloading. Java class changes trigger automatic restarts; static resource changes are reflected instantly.
 
-6. **Configure firewall:**
-   ```bash
-   sudo ufw allow 8080/tcp
-   ```
+### Building for Production
 
-## Optional: Nginx Reverse Proxy
+To create a standalone JAR:
 
-For production use with a domain name, set up Nginx:
-
-1. **Install Nginx:**
-   ```bash
-   sudo apt install -y nginx
-   ```
-
-2. **Configure Nginx:**
-   ```bash
-   sudo cp nginx.conf /etc/nginx/sites-available/chat-application
-   sudo ln -s /etc/nginx/sites-available/chat-application /etc/nginx/sites-enabled/
-   sudo rm /etc/nginx/sites-enabled/default  # Remove default site
-   ```
-
-3. **Edit the configuration:**
-   - Replace `your-domain.com` with your actual domain
-   - Test configuration: `sudo nginx -t`
-   - Restart Nginx: `sudo systemctl restart nginx`
-
-## Post-Deployment
-
-### Check Service Status
-```bash
-sudo systemctl status chat-application
+```sh
+mvn clean package
 ```
 
-### View Logs
-```bash
-# Real-time logs
-sudo journalctl -u chat-application -f
+The JAR file will be created in the `target/` directory.
 
-# Application logs (if logging to file is configured)
-sudo tail -f /var/log/chat-app/chat-application.log
-```
+## Production Deployment
 
-### Manage the Service
-```bash
-# Start
-sudo systemctl start chat-application
+The application is configured with a context path `/jose-chatapp` for production deployment. Static resources (CSS/JS) use absolute paths to ensure proper loading in production environments.
 
-# Stop
-sudo systemctl stop chat-application
+### Configuration
 
-# Restart
-sudo systemctl restart chat-application
+- **Context Path:** `/jose-chatapp` (configured in `application.properties`)
+- **Static Resources:** Served under the context path
+- **WebSocket Endpoint:** Available at `/jose-chatapp/ws`
 
-# Disable auto-start
-sudo systemctl disable chat-application
-```
+## Contributing
 
-## Accessing the Application
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-- **Direct access:** `http://YOUR_VPS_IP:8080`
-- **With Nginx:** `http://your-domain.com` (after domain configuration)
+## License
 
-## Troubleshooting
-
-### Service won't start
-1. Check logs: `sudo journalctl -u chat-application -n 50`
-2. Verify Java installation: `java -version`
-3. Check file permissions: `ls -la /opt/chat-application/`
-
-### Port 8080 not accessible
-1. Check firewall: `sudo ufw status`
-2. Verify service is running: `sudo netstat -tlnp | grep 8080`
-3. Check VPS provider firewall rules
-
-### Memory issues
-- The application is configured to use 256MB-512MB RAM
-- Adjust in the systemd service file if needed
-
-## Security Notes
-
-- The application runs as a non-root user (`chatapp`)
-- Firewall rules limit access to necessary ports only
-- Consider using HTTPS with SSL certificates for production
-- Regularly update your VPS and Java runtime
-
-## Support
-
-If you encounter issues, check:
-1. Application logs
-2. System journal logs
-3. Network connectivity
-4. Java version compatibility (Java 21+ required)
+This project is open source and available under the [MIT License](LICENSE).
